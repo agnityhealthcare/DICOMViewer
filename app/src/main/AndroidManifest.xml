@@ -22,10 +22,12 @@
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
+
                 <data android:mimeType="*/*" />
                 <data android:pathPattern=".*\\.dcm" />
             </intent-filter>
         </activity>
+        <activity android:name=".FileList"></activity>
     </application>
 
 </manifest>

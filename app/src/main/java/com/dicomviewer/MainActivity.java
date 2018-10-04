@@ -1,8 +1,10 @@
 package com.dicomviewer;
 
 import android.Manifest;
+import android.app.Notification;
 import android.content.Context;
 import android.content.EntityIterator;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.os.Build;
@@ -11,7 +13,11 @@ import android.os.Environment;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.widget.ImageView;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import com.imebra.ColorTransformsFactory;
 import com.imebra.*;
@@ -30,35 +36,62 @@ import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
-    private final int PERMISSIONS_ALL = 1;
+    private final static int PERMISSIONS_ALL = 1;
+    private final static int IMAGE_SELECTOR = 2;
     ImageView imageView;
+    TextView name;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         imageView = findViewById(R.id.imageView);
+        name = findViewById(R.id.name);
         String [] PERMISSIONS = {Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.CAMERA};
         if(!hasPermissions(this, PERMISSIONS)){
             ActivityCompat.requestPermissions(this, PERMISSIONS, PERMISSIONS_ALL);
         }
         System.loadLibrary("imebra_lib");
-        File file = new File(getFilesDir(), "/images");
-        Log.d("Directory external ", Environment.getExternalStorageState());
-        File external = new File(Environment.getExternalStorageDirectory() + "/DICOMViewer");
-        Log.d("Directory exists ", String.valueOf(external.exists()));
-        if(external.exists()){
-            Log.d("Directory Path ", external.getPath());
-            File[] dirFiles = external.listFiles();
-            String path = dirFiles[0].getPath();
-            Log.d("Directory file Path: ", path);
-            displayImage(path);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if(requestCode == IMAGE_SELECTOR){
+            if(resultCode == RESULT_OK){
+                String path = data.getStringExtra("path");
+                displayImage(path);
+            }
+            else{
+                Toast.makeText(this, "Error loading image", Toast.LENGTH_LONG).show();
+            }
         }
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.image_selector_action_bar, menu);
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()){
+            case R.id.select_image:
+                Intent in = new Intent(this, FileList.class);
+                startActivityForResult(in, IMAGE_SELECTOR);
+                break;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     private void displayImage(String directoryPath){
         Log.d("Path of file: ", directoryPath);
-        DataSet dicomDataSet = CodecFactory.load(directoryPath, 2048);
+        DataSet dicomDataSet = CodecFactory.load(directoryPath);
+        String n = dicomDataSet.getString(new TagId(0x10, 0x10), 0);
+        if(n != null){
+           name.setText(n);
+        }
         Image image = dicomDataSet.getImageApplyModalityTransform(0);
 
         String colorSpace = image.getColorSpace();
