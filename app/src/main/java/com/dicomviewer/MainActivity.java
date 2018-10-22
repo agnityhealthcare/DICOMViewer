@@ -28,6 +28,7 @@ import com.imebra.TransformsChain;
 import com.imebra.VOILUT;
 import com.imebra.VOIs;
 import com.imebra.drawBitmapType_t;
+import com.jsibbold.zoomage.ZoomageView;
 
 import java.io.File;
 import java.nio.ByteBuffer;
@@ -38,14 +39,14 @@ public class MainActivity extends AppCompatActivity {
 
     private final static int PERMISSIONS_ALL = 1;
     private final static int IMAGE_SELECTOR = 2;
-    ImageView imageView;
+    ZoomageView zoomageView;
     TextView name;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        imageView = findViewById(R.id.imageView);
+        zoomageView = findViewById(R.id.myZoomageView);
         name = findViewById(R.id.name);
         String [] PERMISSIONS = {Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.CAMERA};
         if(!hasPermissions(this, PERMISSIONS)){
@@ -141,7 +142,7 @@ public class MainActivity extends AppCompatActivity {
         Bitmap renderBitmap = Bitmap.createBitmap((int) image.getWidth(), (int) image.getHeight(), Bitmap.Config.ARGB_8888);
         renderBitmap.copyPixelsFromBuffer(byteBuffer);
 
-        imageView.setImageBitmap(renderBitmap);
+        zoomageView.setImageBitmap(renderBitmap);
     }
 
     public static boolean hasPermissions(Context context, String... permissions) {

@@ -3,6 +3,6 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
         android:id="@+id/select_image"
-        app:showAsAction="never"
-        android:title="Crop image" />
+        android:title="Select image"
+        app:showAsAction="never" />
 </menu>
